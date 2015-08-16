@@ -7,6 +7,7 @@ import com.amannmalik.service.barebones.endpoint.HealthServlet;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
+import io.undertow.server.handlers.PathHandler;
 import io.undertow.server.handlers.resource.ClassPathResourceManager;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
@@ -29,15 +30,14 @@ public class Application {
 
         ((Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(Level.DEBUG);
 
+        PathHandler path = Handlers.path(getContentProvider());
         Undertow server = Undertow.builder()
                 .addHttpListener(8080, "0.0.0.0")
-                .setHandler(
-                        Handlers.path(getContentProvider())
-                                .addPrefixPath("/service", getServiceProvider())
-                )
+                .setHandler(path)
                 .build();
 
         server.start();
+        path.addPrefixPath("/service", getServiceProvider());
 
     }
 
@@ -78,7 +78,7 @@ public class Application {
 
     public static void addApiServlet(DeploymentInfo deploymentInfo) {
         ResteasyDeployment resteasyDeployment = new ResteasyDeployment();
-        resteasyDeployment.setInjectorFactoryClass("org.jboss.resteasy.cdi.CdiInjectorFactory");
+        resteasyDeployment.setInjectorFactoryClass("com.amannmalik.service.barebones.adapter.CdiInjectorFactory");
         resteasyDeployment.setApplicationClass(ExampleResourceApplication.class.getName());
         deploymentInfo.addServlet(
                 Servlets.servlet(HttpServlet30Dispatcher.class)
