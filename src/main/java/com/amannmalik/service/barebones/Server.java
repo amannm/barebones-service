@@ -32,6 +32,7 @@ public class Server {
 
         ((Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(Level.DEBUG);
 
+        System.setProperty("org.jboss.weld.se.archive.isolation", "false");
         WeldContainer container = new Weld()
                 .disableDiscovery()
                 .addExtension(new org.jboss.resteasy.cdi.ResteasyCdiExtension())
