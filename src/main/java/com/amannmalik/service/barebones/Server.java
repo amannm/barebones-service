@@ -2,7 +2,6 @@ package com.amannmalik.service.barebones;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import com.amannmalik.service.barebones.adapter.ResteasyCdiExtension;
 import com.amannmalik.service.barebones.endpoint.ExampleResourceApplication;
 import com.amannmalik.service.barebones.endpoint.HealthServlet;
 import io.undertow.Handlers;
@@ -26,7 +25,7 @@ import javax.servlet.ServletException;
 /**
  * Created by Amann on 8/11/2015.
  */
-public class Application {
+public class Server {
 
 
     public static void main(String[] args) throws ServletException {
@@ -35,37 +34,35 @@ public class Application {
 
         WeldContainer container = new Weld()
                 .disableDiscovery()
-                .addExtension(new ResteasyCdiExtension())
-                .addPackage(true, HealthServlet.class).initialize();
+                .addExtension(new org.jboss.resteasy.cdi.ResteasyCdiExtension())
+                .addPackage(true, Server.class)
+                .initialize();
 
+        PathHandler path = Handlers.path(getContentProvider())
+                .addPrefixPath("/service", getServiceProvider());
 
-        PathHandler path = Handlers.path(getContentProvider());
         Undertow server = Undertow.builder()
                 .addHttpListener(8080, "0.0.0.0")
                 .setHandler(path)
                 .build();
-
         server.start();
-        path.addPrefixPath("/service", getServiceProvider());
 
     }
 
-    public static HttpHandler getContentProvider() {
+    private static HttpHandler getContentProvider() {
+
         ClassPathResourceManager publicResources = new ClassPathResourceManager(Thread.currentThread().getContextClassLoader(), "public");
         HttpHandler handler = Handlers.resource(publicResources);
         return handler;
+
     }
 
-    public static HttpHandler getServiceProvider() throws ServletException {
+    private static HttpHandler getServiceProvider() throws ServletException {
 
         DeploymentInfo servletDeployment = new DeploymentInfo()
                 .setClassLoader(Thread.currentThread().getContextClassLoader())
                 .setDeploymentName("Services")
-                .setContextPath("/")
-//                .addListeners(
-//                        Servlets.listener(org.jboss.weld.environment.servlet.Listener.class)
-//                )
-                ;
+                .setContextPath("/");
 
         addHealthServlet(servletDeployment);
         addApiServlet(servletDeployment);
@@ -78,18 +75,23 @@ public class Application {
         return handler;
     }
 
-    public static void addHealthServlet(DeploymentInfo deploymentInfo) {
+    private static void addHealthServlet(DeploymentInfo deploymentInfo) {
+
         deploymentInfo.addServlets(
                 Servlets.servlet(HealthServlet.class)
                         .setLoadOnStartup(1)
                         .addMapping("/health")
         );
+
     }
 
-    public static void addApiServlet(DeploymentInfo deploymentInfo) {
+    private static void addApiServlet(DeploymentInfo deploymentInfo) {
+
         ResteasyDeployment resteasyDeployment = new ResteasyDeployment();
-        resteasyDeployment.setInjectorFactoryClass("com.amannmalik.service.barebones.adapter.CdiInjectorFactory");
         resteasyDeployment.setApplicationClass(ExampleResourceApplication.class.getName());
+        resteasyDeployment.setInjectorFactoryClass("org.jboss.resteasy.cdi.CdiInjectorFactory");
+
+        deploymentInfo.addServletContextAttribute("org.jboss.resteasy.spi.ResteasyDeployment", resteasyDeployment);
         deploymentInfo.addServlet(
                 Servlets.servlet(HttpServlet30Dispatcher.class)
                         .setLoadOnStartup(1)
@@ -97,7 +99,7 @@ public class Application {
                         .setAsyncSupported(true)
                         .addInitParam("resteasy.servlet.mapping.prefix", "/service/api")
         );
-        deploymentInfo.addServletContextAttribute("org.jboss.resteasy.spi.ResteasyDeployment", resteasyDeployment);
+
     }
 
 

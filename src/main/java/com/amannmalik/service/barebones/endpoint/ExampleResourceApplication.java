@@ -7,11 +7,13 @@ package com.amannmalik.service.barebones.endpoint;
 
 import io.swagger.jaxrs.config.BeanConfig;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.core.Application;
 import java.util.HashSet;
 import java.util.Set;
 
 
+@ApplicationScoped
 public class ExampleResourceApplication extends Application {
 
     public ExampleResourceApplication() {
@@ -23,7 +25,7 @@ public class ExampleResourceApplication extends Application {
         config.setLicense("All Rights Reserved");
 
         config.setVersion("1");
-        config.setBasePath("/service/api/");
+        config.setBasePath("/service/api");
         config.setResourcePackage("com.amannmalik.service.barebones.endpoint");
 
         config.setScan(true);

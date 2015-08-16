@@ -10,6 +10,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -17,8 +19,11 @@ import javax.ws.rs.core.MediaType;
 
 @Api(value = "/api/greeting", description = "Example API operations")
 @Path("/greeting")
+@Dependent
 public class ExampleResource {
 
+    @Inject
+    private ExampleData data;
 
     @ApiOperation("Get a resource")
     @ApiResponses({
@@ -28,6 +33,6 @@ public class ExampleResource {
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     public String getHelloWorld() {
-        return "Hello World";
+        return data.getGreeting();
     }
 }
