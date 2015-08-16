@@ -13,6 +13,9 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.CDI;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.servlet.ServletContext;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
@@ -33,7 +36,7 @@ public class CdiInjectorFactory implements InjectorFactory {
     private Map<Class<?>, Type> sessionBeanInterface;
 
     public CdiInjectorFactory() {
-        this.manager = CDI.current().getBeanManager();
+        this.manager = lookupBeanManager();
         this.extension = lookupResteasyCdiExtension();
         sessionBeanInterface = extension.getSessionBeanInterface();
     }
@@ -104,6 +107,96 @@ public class CdiInjectorFactory implements InjectorFactory {
         return delegate.createParameterExtractor(injectTargetClass, injectTarget, type, genericType, annotations, useDefault, factory);
     }
 
+    /**
+     * Do a lookup for BeanManager instance. JNDI and ServletContext is searched.
+     *
+     * @return BeanManager instance
+     */
+    protected BeanManager lookupBeanManager() {
+        BeanManager beanManager = null;
+
+        // Do a lookup for BeanManager in JNDI (this is the only *portable* way)
+        beanManager = lookupBeanManagerInJndi("java:comp/BeanManager");
+        if (beanManager != null) {
+            log.debug("Found BeanManager at java:comp/BeanManager");
+            return beanManager;
+        }
+
+        // Do a lookup for BeanManager at an alternative JNDI location (workaround for WELDINT-19)
+        beanManager = lookupBeanManagerInJndi("java:app/BeanManager");
+        if (beanManager != null) {
+            log.debug("Found BeanManager at java:app/BeanManager");
+            return beanManager;
+        }
+
+        beanManager = lookupBeanManagerCDIUtil();
+        if (beanManager != null) {
+            log.debug("Found BeanManager via CDI Util");
+            return beanManager;
+        }
+
+        beanManager = lookupBeanManagerViaServletContext();
+        if (beanManager != null) {
+            log.debug("Found BeanManager in ServletContext");
+            return beanManager;
+        }
+
+        throw new RuntimeException("Unable to lookup BeanManager.");
+    }
+
+    private BeanManager lookupBeanManagerInJndi(String name) {
+        try {
+            InitialContext ctx = new InitialContext();
+            log.debug("Doing a lookup for BeanManager in {0}", name);
+            return (BeanManager) ctx.lookup(name);
+        } catch (NamingException e) {
+            log.debug("Unable to obtain BeanManager from {0}", name);
+            return null;
+        } catch (NoClassDefFoundError ncdfe) {
+            log.debug("Unable to perform JNDI lookups. You are probably running on GAE.");
+            return null;
+        }
+    }
+
+    private static BeanManager lookupBeanManagerViaServletContext() {
+        BeanManager beanManager = null;
+        try {
+            // Look for BeanManager in ServletContext
+            ServletContext servletContext = ResteasyProviderFactory.getContextData(ServletContext.class);
+            // null check for RESTEASY-1009
+            if (servletContext != null) {
+                beanManager = (BeanManager) servletContext.getAttribute(BEAN_MANAGER_ATTRIBUTE_PREFIX + BeanManager.class.getName());
+                if (beanManager != null) {
+                    log.debug("Found BeanManager in ServletContext");
+                    return beanManager;
+                }
+
+                // Look for BeanManager in ServletContext (the old attribute name for backwards compatibility)
+                beanManager = (BeanManager) servletContext.getAttribute(BeanManager.class.getName());
+                if (beanManager != null) {
+                    log.debug("Found BeanManager in ServletContext");
+                    return beanManager;
+                }
+            }
+        } catch (NoClassDefFoundError e) {
+            log.debug("Unable to find ServletContext class ", e);
+        } catch (Exception e) {
+            log.debug("Error occurred trying to look up via ServletContext.", e);
+        }
+        return beanManager;
+    }
+
+    public static BeanManager lookupBeanManagerCDIUtil() {
+        BeanManager bm = null;
+        try {
+            bm = CDI.current().getBeanManager();
+        } catch (NoClassDefFoundError e) {
+            log.debug("Unable to find CDI class ", e);
+        } catch (Exception e) {
+            log.debug("Error occurred trying to look up via CDI util.", e);
+        }
+        return bm;
+    }
 
     /**
      * Lookup ResteasyCdiExtension instance that was instantiated during CDI bootstrap

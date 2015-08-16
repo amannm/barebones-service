@@ -2,6 +2,7 @@ package com.amannmalik.service.barebones;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
+import com.amannmalik.service.barebones.adapter.ResteasyCdiExtension;
 import com.amannmalik.service.barebones.endpoint.ExampleResourceApplication;
 import com.amannmalik.service.barebones.endpoint.HealthServlet;
 import io.undertow.Handlers;
@@ -15,6 +16,8 @@ import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.ServletContainer;
 import org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher;
 import org.jboss.resteasy.spi.ResteasyDeployment;
+import org.jboss.weld.environment.se.Weld;
+import org.jboss.weld.environment.se.WeldContainer;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
@@ -29,6 +32,12 @@ public class Application {
     public static void main(String[] args) throws ServletException {
 
         ((Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(Level.DEBUG);
+
+        WeldContainer container = new Weld()
+                .disableDiscovery()
+                .addExtension(new ResteasyCdiExtension())
+                .addPackage(true, HealthServlet.class).initialize();
+
 
         PathHandler path = Handlers.path(getContentProvider());
         Undertow server = Undertow.builder()
@@ -53,9 +62,10 @@ public class Application {
                 .setClassLoader(Thread.currentThread().getContextClassLoader())
                 .setDeploymentName("Services")
                 .setContextPath("/")
-                .addListeners(
-                        Servlets.listener(org.jboss.weld.environment.servlet.Listener.class)
-                );
+//                .addListeners(
+//                        Servlets.listener(org.jboss.weld.environment.servlet.Listener.class)
+//                )
+                ;
 
         addHealthServlet(servletDeployment);
         addApiServlet(servletDeployment);
