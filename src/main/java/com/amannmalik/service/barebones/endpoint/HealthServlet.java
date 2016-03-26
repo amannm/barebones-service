@@ -21,25 +21,28 @@ import java.nio.file.Paths;
 @WebServlet
 public class HealthServlet extends HttpServlet {
 
-    private static final long THRESHOLD_BYTES = 10485760L;
+    private static final long MIN_AVAILABLE_BYTES = 10485760L;
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+        FileStore homeStore = Files.getFileStore(Paths.get(System.getProperty("user.home")));
+        long available = homeStore.getUsableSpace();
+        long total = homeStore.getUsableSpace();
+
         resp.setContentType("application/json");
         try (JsonWriter writer = Json.createWriter(resp.getOutputStream())) {
-            FileStore homeStore = Files.getFileStore(Paths.get(System.getProperty("user.home")));
-            long available = homeStore.getUsableSpace();
-            long total = homeStore.getUsableSpace();
-            JsonObject build = Json.createObjectBuilder()
+            JsonObject healthResponse = Json.createObjectBuilder()
                     .add("status", "UP")
                     .add("diskSpace", Json.createObjectBuilder()
-                                    .add("status", available < THRESHOLD_BYTES ? "DOWN" : "UP")
+                                    .add("status", available < MIN_AVAILABLE_BYTES ? "DOWN" : "UP")
                                     .add("total", total)
                                     .add("free", available)
-                                    .add("threshold", THRESHOLD_BYTES)
+                                    .add("threshold", MIN_AVAILABLE_BYTES)
                     ).build();
-            writer.writeObject(build);
+            writer.writeObject(healthResponse);
         }
+
     }
 
     @Override
