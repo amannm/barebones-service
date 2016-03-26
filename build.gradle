@@ -14,6 +14,7 @@ repositories {
 dependencies {
 
     compile "org.slf4j:slf4j-api:1.7.12"
+
     compile "javax.enterprise:cdi-api:2.0-EDR1"
     compile "javax.servlet:javax.servlet-api:3.1.0"
     compile "javax.ws.rs:javax.ws.rs-api:2.0.1"
@@ -35,7 +36,7 @@ dependencies {
 }
 
 wrapper {
-    gradleVersion = "2.10"
+    gradleVersion = "2.12"
 }
 
 jar {
