@@ -1,8 +1,5 @@
 package com.amannmalik.service.barebones;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import com.amannmalik.service.barebones.endpoint.ExampleResourceApplication;
 import com.amannmalik.service.barebones.endpoint.HealthServlet;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
@@ -12,14 +9,15 @@ import io.undertow.server.handlers.resource.ClassPathResourceManager;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
-import io.undertow.servlet.api.ServletContainer;
-import org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher;
-import org.jboss.resteasy.spi.ResteasyDeployment;
-import org.jboss.weld.environment.se.Weld;
-import org.jboss.weld.environment.se.WeldContainer;
-import org.slf4j.LoggerFactory;
+import org.jboss.weld.environment.servlet.Listener;
 
+import javax.enterprise.inject.spi.BeanManager;
+import javax.inject.Inject;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 
 /**
@@ -27,77 +25,42 @@ import javax.servlet.ServletException;
  */
 public class Server {
 
-
     public static void main(String[] args) throws ServletException {
 
-        ((Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(Level.DEBUG);
+        DeploymentInfo servletBuilder = Servlets.deployment()
+                .setClassLoader(Server.class.getClassLoader())
+                .setResourceManager(new ClassPathResourceManager(Server.class.getClassLoader()))
+                .setContextPath("/")
+                .setDeploymentName("test.war")
+                .addServlet(Servlets.servlet("hello", HelloWorldServlet.class).addMapping("/*"))
+                .addListener(Servlets.listener(Listener.class));
 
-        WeldContainer container = new Weld()
-                .addExtension(new org.jboss.resteasy.cdi.ResteasyCdiExtension())
-                .addPackage(true, Server.class)
-                .initialize();
 
-        PathHandler path = Handlers.path(getContentProvider())
-                .addPrefixPath("/services", getServiceProvider());
+        DeploymentManager manager = Servlets.defaultContainer().addDeployment(servletBuilder);
+        manager.deploy();
+        HttpHandler servletHandler = manager.start();
+        PathHandler path = Handlers.path(Handlers.redirect("/"))
+                .addPrefixPath("/", servletHandler);
 
-        Undertow server = Undertow.builder()
-                .addHttpListener(8080, "0.0.0.0")
-                .setHandler(path)
-                .build();
+        Undertow server = Undertow.builder().addHttpListener(8080, "localhost").setHandler(path).build();
+
         server.start();
 
     }
 
-    private static HttpHandler getContentProvider() {
 
-        ClassPathResourceManager publicResources = new ClassPathResourceManager(Thread.currentThread().getContextClassLoader(), "public");
-        HttpHandler handler = Handlers.resource(publicResources);
-        return handler;
+    public static class HelloWorldServlet extends HttpServlet {
 
-    }
 
-    private static HttpHandler getServiceProvider() throws ServletException {
+        @Inject
+        BeanManager manager;
 
-        DeploymentInfo servletDeployment = new DeploymentInfo()
-                .setClassLoader(Thread.currentThread().getContextClassLoader())
-                .setDeploymentName("services.war")
-                .setContextPath("/");
 
-        addHealthServlet(servletDeployment);
-        addApiServlet(servletDeployment);
+        protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+            resp.setContentType("text/plain");
+            resp.getWriter().append("Hello from " + manager);
 
-        ServletContainer container = Servlets.defaultContainer();
-
-        DeploymentManager deploymentManager = container.addDeployment(servletDeployment);
-        deploymentManager.deploy();
-        HttpHandler handler = deploymentManager.start();
-        return handler;
-    }
-
-    private static void addHealthServlet(DeploymentInfo deploymentInfo) {
-
-        deploymentInfo.addServlets(
-                Servlets.servlet(HealthServlet.class)
-                        .setLoadOnStartup(1)
-                        .addMapping("/health")
-        );
-
-    }
-
-    private static void addApiServlet(DeploymentInfo deploymentInfo) {
-
-        ResteasyDeployment resteasyDeployment = new ResteasyDeployment();
-        resteasyDeployment.setApplicationClass(ExampleResourceApplication.class.getName());
-        resteasyDeployment.setInjectorFactoryClass("org.jboss.resteasy.cdi.CdiInjectorFactory");
-
-        deploymentInfo.addServletContextAttribute("org.jboss.resteasy.spi.ResteasyDeployment", resteasyDeployment);
-        deploymentInfo.addServlet(
-                Servlets.servlet(HttpServlet30Dispatcher.class)
-                        .setLoadOnStartup(1)
-                        .addMapping("/api/*")
-                        .setAsyncSupported(true)
-                        .addInitParam("resteasy.servlet.mapping.prefix", "/services/api")
-        );
+        }
 
     }
 
