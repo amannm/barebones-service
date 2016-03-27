@@ -7,11 +7,12 @@ package com.amannmalik.service.barebones.endpoint;
 import io.swagger.jaxrs.config.BeanConfig;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.ws.rs.core.Application;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
-@ApplicationScoped
 public class ExampleResourceApplication extends Application {
 
     public ExampleResourceApplication() {
@@ -26,6 +27,7 @@ public class ExampleResourceApplication extends Application {
         config.setBasePath("/services/api");
         config.setResourcePackage("com.amannmalik.service.barebones.endpoint");
 
+        config.setPrettyPrint(true);
         config.setScan(true);
     }
 
@@ -34,6 +36,7 @@ public class ExampleResourceApplication extends Application {
         Set<Class<?>> resources = new HashSet<>();
 
         resources.add(ExampleResource.class);
+
         resources.add(CrossOriginResourceSharingFilter.class);
 
         resources.add(io.swagger.jaxrs.listing.ApiListingResource.class);

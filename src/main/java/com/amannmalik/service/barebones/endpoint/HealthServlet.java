@@ -1,5 +1,7 @@
 package com.amannmalik.service.barebones.endpoint;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonWriter;
@@ -19,6 +21,7 @@ import java.nio.file.Paths;
 
 
 @WebServlet
+@ApplicationScoped
 public class HealthServlet extends HttpServlet {
 
     private static final long MIN_AVAILABLE_BYTES = 10485760L;

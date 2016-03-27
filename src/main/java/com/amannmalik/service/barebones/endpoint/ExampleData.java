@@ -1,5 +1,6 @@
 package com.amannmalik.service.barebones.endpoint;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 
 /**
@@ -10,8 +11,8 @@ import javax.enterprise.context.Dependent;
 @Dependent
 public class ExampleData {
 
-    public String getGreeting() {
-        return "Hello World";
+    public void getGreeting() {
+        System.out.println("farto");
     }
 
 }

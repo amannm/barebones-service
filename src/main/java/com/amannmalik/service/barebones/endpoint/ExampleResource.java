@@ -10,7 +10,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.spi.CDI;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -19,7 +21,7 @@ import javax.ws.rs.core.MediaType;
 
 @Api(value = "/", description = "Example API operations")
 @Path("/")
-@Dependent
+@ApplicationScoped
 public class ExampleResource {
 
     @Inject
@@ -34,6 +36,7 @@ public class ExampleResource {
     @Path("/greeting")
     @Produces(MediaType.TEXT_PLAIN)
     public String getHelloWorld() {
-        return data.getGreeting();
+       data.getGreeting();
+        return "hello world";
     }
 }
