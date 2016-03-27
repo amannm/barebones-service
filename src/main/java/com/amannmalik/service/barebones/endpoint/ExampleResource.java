@@ -17,8 +17,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-@Api(value = "/api/greeting", description = "Example API operations")
-@Path("/greeting")
+@Api(value = "/", description = "Example API operations")
+@Path("/")
 @Dependent
 public class ExampleResource {
 
@@ -31,6 +31,7 @@ public class ExampleResource {
             @ApiResponse(code = 500, message = "An internal server error occurred")
     })
     @GET
+    @Path("/greeting")
     @Produces(MediaType.TEXT_PLAIN)
     public String getHelloWorld() {
         return data.getGreeting();

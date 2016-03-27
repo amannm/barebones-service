@@ -13,7 +13,6 @@ import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 
 @Provider
-@Dependent
 public class CrossOriginResourceSharingFilter implements ContainerResponseFilter {
 
     @Override

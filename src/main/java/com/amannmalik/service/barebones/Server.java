@@ -38,7 +38,7 @@ public class Server {
                 .initialize();
 
         PathHandler path = Handlers.path(getContentProvider())
-                .addPrefixPath("/service", getServiceProvider());
+                .addPrefixPath("/services", getServiceProvider());
 
         Undertow server = Undertow.builder()
                 .addHttpListener(8080, "0.0.0.0")
@@ -60,7 +60,7 @@ public class Server {
 
         DeploymentInfo servletDeployment = new DeploymentInfo()
                 .setClassLoader(Thread.currentThread().getContextClassLoader())
-                .setDeploymentName("Services")
+                .setDeploymentName("services.war")
                 .setContextPath("/");
 
         addHealthServlet(servletDeployment);
@@ -96,7 +96,7 @@ public class Server {
                         .setLoadOnStartup(1)
                         .addMapping("/api/*")
                         .setAsyncSupported(true)
-                        .addInitParam("resteasy.servlet.mapping.prefix", "/service/api")
+                        .addInitParam("resteasy.servlet.mapping.prefix", "/services/api")
         );
 
     }

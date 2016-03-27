@@ -23,7 +23,7 @@ public class ExampleResourceApplication extends Application {
         config.setLicense("All Rights Reserved");
 
         config.setVersion("1");
-        config.setBasePath("/service/api");
+        config.setBasePath("/services/api");
         config.setResourcePackage("com.amannmalik.service.barebones.endpoint");
 
         config.setScan(true);
@@ -37,7 +37,7 @@ public class ExampleResourceApplication extends Application {
         resources.add(CrossOriginResourceSharingFilter.class);
 
         resources.add(io.swagger.jaxrs.listing.ApiListingResource.class);
-        resources.add(io.swagger.jaxrs.json.JacksonJsonProvider.class);
+        resources.add(io.swagger.jaxrs.listing.SwaggerSerializers.class);
 
         return resources;
     }
