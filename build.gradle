@@ -19,7 +19,7 @@ dependencies {
 
     // Dependency Injection
     compile "javax.enterprise:cdi-api:2.0-EDR1"
-    compile "org.jboss.weld.se:weld-se-core:3.0.0.Alpha15"
+    compile "org.jboss.weld.servlet:weld-servlet:3.0.0.Alpha15"
 
     // HTTP Server
     compile "javax.servlet:javax.servlet-api:3.1.0"
@@ -27,8 +27,8 @@ dependencies {
 
     // RESTful Web Services
     compile "javax.ws.rs:javax.ws.rs-api:2.0.1"
-    compile "org.jboss.resteasy:resteasy-cdi:3.0.16.Final"
-    compile "org.jboss.resteasy:async-http-servlet-3.0:3.0.16.Final"
+    //compile "org.jboss.resteasy:resteasy-jaxrs:3.0.16.Final"
+    //compile "org.jboss.resteasy:async-http-servlet-3.0:3.0.16.Final"
 
     // JSON Processing
     compile "javax.json:javax.json-api:1.0"

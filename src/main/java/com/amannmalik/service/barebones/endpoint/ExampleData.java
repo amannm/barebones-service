@@ -1,6 +1,7 @@
 package com.amannmalik.service.barebones.endpoint;
 
 import javax.enterprise.context.Dependent;
+import javax.ws.rs.ext.Provider;
 
 /**
  * Created by Amann on 8/16/2015.

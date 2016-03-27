@@ -4,7 +4,6 @@ package com.amannmalik.service.barebones.endpoint;
  * Created by amann.malik on 6/2/2015.
  */
 
-import javax.enterprise.context.Dependent;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
@@ -13,7 +12,6 @@ import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 
 @Provider
-@Dependent
 public class CrossOriginResourceSharingFilter implements ContainerResponseFilter {
 
     @Override

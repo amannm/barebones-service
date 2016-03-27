@@ -13,10 +13,6 @@ import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.ServletContainer;
-import org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher;
-import org.jboss.resteasy.spi.ResteasyDeployment;
-import org.jboss.weld.environment.se.Weld;
-import org.jboss.weld.environment.se.WeldContainer;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
@@ -32,74 +28,50 @@ public class Server {
 
         ((Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(Level.DEBUG);
 
-        WeldContainer container = new Weld()
-                .addExtension(new org.jboss.resteasy.cdi.ResteasyCdiExtension())
-                .addPackage(true, Server.class)
-                .initialize();
-
-        PathHandler path = Handlers.path(getContentProvider())
-                .addPrefixPath("/service", getServiceProvider());
-
         Undertow server = Undertow.builder()
                 .addHttpListener(8080, "0.0.0.0")
-                .setHandler(path)
+                .setHandler(getHandler())
                 .build();
         server.start();
 
     }
 
-    private static HttpHandler getContentProvider() {
+    private static PathHandler getHandler() throws ServletException {
+        ClassLoader contextClassLoader = Server.class.getClassLoader();
 
-        ClassPathResourceManager publicResources = new ClassPathResourceManager(Thread.currentThread().getContextClassLoader(), "public");
-        HttpHandler handler = Handlers.resource(publicResources);
-        return handler;
+        ClassPathResourceManager publicResources = new ClassPathResourceManager(contextClassLoader, "public");
 
-    }
+        //ResteasyDeployment resteasyDeployment = new ResteasyDeployment();
+        //resteasyDeployment.setApplicationClass(ExampleResourceApplication.class.getName());
+        //resteasyDeployment.setInjectorFactoryClass(CdiInjectorFactory.class.getName());
 
-    private static HttpHandler getServiceProvider() throws ServletException {
+       DeploymentInfo deployment = Servlets.deployment()
+                .setClassLoader(contextClassLoader)
+               .setContextPath("/")
+                .setDeploymentName("service.war")
+                .addListener(Servlets.listener(org.jboss.weld.environment.servlet.Listener.class))
 
-        DeploymentInfo servletDeployment = new DeploymentInfo()
-                .setClassLoader(Thread.currentThread().getContextClassLoader())
-                .setDeploymentName("Services")
-                .setContextPath("/");
+               .addServlets(
+                       Servlets.servlet(HealthServlet.class)
+                               .setLoadOnStartup(1)
+                               .addMapping("/health")
+               )
 
-        addHealthServlet(servletDeployment);
-        addApiServlet(servletDeployment);
+//                       Servlets.servlet(org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher.class)
+//                               .setLoadOnStartup(1)
+//                               .setAsyncSupported(true)
+//                               .addInitParam("resteasy.servlet.mapping.prefix", "/api")
+//                               .addMapping("/api/*")
 
+               //.addServletContextAttribute(ResteasyDeployment.class.getName(), resteasyDeployment);
+;
         ServletContainer container = Servlets.defaultContainer();
-
-        DeploymentManager deploymentManager = container.addDeployment(servletDeployment);
+        DeploymentManager deploymentManager = container.addDeployment(deployment);
         deploymentManager.deploy();
-        HttpHandler handler = deploymentManager.start();
-        return handler;
+        HttpHandler serviceHandler = deploymentManager.start();
+        return Handlers.path(Handlers.resource(publicResources)).addPrefixPath("/health", serviceHandler);
     }
 
-    private static void addHealthServlet(DeploymentInfo deploymentInfo) {
-
-        deploymentInfo.addServlets(
-                Servlets.servlet(HealthServlet.class)
-                        .setLoadOnStartup(1)
-                        .addMapping("/health")
-        );
-
-    }
-
-    private static void addApiServlet(DeploymentInfo deploymentInfo) {
-
-        ResteasyDeployment resteasyDeployment = new ResteasyDeployment();
-        resteasyDeployment.setApplicationClass(ExampleResourceApplication.class.getName());
-        resteasyDeployment.setInjectorFactoryClass("org.jboss.resteasy.cdi.CdiInjectorFactory");
-
-        deploymentInfo.addServletContextAttribute("org.jboss.resteasy.spi.ResteasyDeployment", resteasyDeployment);
-        deploymentInfo.addServlet(
-                Servlets.servlet(HttpServlet30Dispatcher.class)
-                        .setLoadOnStartup(1)
-                        .addMapping("/api/*")
-                        .setAsyncSupported(true)
-                        .addInitParam("resteasy.servlet.mapping.prefix", "/service/api")
-        );
-
-    }
 
 
 }
