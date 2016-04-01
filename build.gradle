@@ -3,7 +3,6 @@ group 'com.amannmalik.service'
 apply plugin: "java"
 apply plugin: "application"
 
-sourceCompatibility = 1.8
 mainClassName = "com.amannmalik.service.barebones.Server"
 
 repositories {
