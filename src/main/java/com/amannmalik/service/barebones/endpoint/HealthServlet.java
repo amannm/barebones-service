@@ -29,6 +29,7 @@ public class HealthServlet extends HttpServlet {
         FileStore homeStore = Files.getFileStore(Paths.get(System.getProperty("user.home")));
         long available = homeStore.getUsableSpace();
         long total = homeStore.getUsableSpace();
+
         JsonObject healthResponse = Json.createObjectBuilder()
                 .add("status", "UP")
                 .add("diskSpace", Json.createObjectBuilder()
@@ -37,6 +38,7 @@ public class HealthServlet extends HttpServlet {
                         .add("free", available)
                         .add("threshold", MIN_AVAILABLE_BYTES)
                 ).build();
+
         resp.setContentType("application/json");
         try (JsonWriter writer = Json.createWriter(resp.getOutputStream())) {
             writer.writeObject(healthResponse);
