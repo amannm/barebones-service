@@ -13,32 +13,32 @@ repositories {
 dependencies {
 
     // Logging
-    compile "org.slf4j:slf4j-api:1.7.22"
-    compile "ch.qos.logback:logback-classic:1.1.8"
+    compile "org.slf4j:slf4j-api:1.7.19"
+    compile "ch.qos.logback:logback-classic:1.1.6"
+
+    // Dependency Injection
+    compile "javax.enterprise:cdi-api:2.0-EDR1"
+    compile "org.jboss.weld.se:weld-se-core:3.0.0.Alpha15"
 
     // HTTP Server
     compile "javax.servlet:javax.servlet-api:3.1.0"
-    compile "io.undertow:undertow-servlet:1.4.8.Final"
+    compile "io.undertow:undertow-servlet:1.3.19.Final"
 
     // Websocket Support
     compile "javax.websocket:javax.websocket-api:1.1"
-    compile "io.undertow:undertow-websockets-jsr:1.4.8.Final"
+    compile "io.undertow:undertow-websockets-jsr:1.3.19.Final"
 
     // RESTful Web Services
     compile "javax.ws.rs:javax.ws.rs-api:2.0.1"
-    compile "org.jboss.resteasy:resteasy-cdi:3.1.0.Final"
-    compile "org.jboss.resteasy:async-http-servlet-3.0:3.1.0.Beta2"
-
-    // Dependency Injection
-    compile "javax.enterprise:cdi-api:2.0-EDR2"
-    compile "org.jboss.weld.se:weld-se-core:3.0.0.Beta1"
+    compile "org.jboss.resteasy:resteasy-cdi:3.0.16.Final"
+    compile "org.jboss.resteasy:async-http-servlet-3.0:3.0.16.Final"
 
     // JSON Processing
     compile "javax.json:javax.json-api:1.0"
     compile "org.glassfish:javax.json:1.0.4"
 
     // API Documentation
-    compile "io.swagger:swagger-jersey2-jaxrs:1.5.12"
+    compile "io.swagger:swagger-jersey2-jaxrs:1.5.8"
 
     // Unit Testing
     testCompile "junit:junit:4.12"
