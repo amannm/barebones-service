@@ -1,2 +1,8 @@
 #Barebones Service
-A no-frills barebone dockerized microservice with direct usage of Undertow, CDI, Swagger, and some Java EE components
+A starting-point webserver microservice:
+
+* Static content root (/)
+* Health check endpoint (/services/health)
+* API endpoint (/services/api)
+* Websocket endpoint (/socket)
+* API documentation (/swagger)
