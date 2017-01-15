@@ -3,6 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <title>AmannMalik.com</title>
+    <script type="text/javascript" src="endpoint.js"></script>
+    <script type="text/javascript">
+
+        var endpoint = new Endpoint();
+
+        window.onload = function () {
+            endpoint.open('ws://localhost:8080/socket');
+        };
+
+        window.onbeforeunload = function () {
+            endpoint.close();
+        };
+
+    </script>
 </head>
 <body>
 <section>
