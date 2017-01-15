@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import com.amannmalik.service.barebones.endpoint.ExampleResourceApplication;
 import com.amannmalik.service.barebones.endpoint.HealthServlet;
+import com.amannmalik.service.barebones.endpoint.WebsocketEndpoint;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
@@ -13,6 +14,7 @@ import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.ServletContainer;
+import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
 import org.jboss.resteasy.plugins.server.servlet.HttpServlet30Dispatcher;
 import org.jboss.resteasy.spi.ResteasyDeployment;
 import org.jboss.weld.environment.se.Weld;
@@ -38,12 +40,14 @@ public class Server {
                 .initialize();
 
         PathHandler path = Handlers.path(getContentProvider())
-                .addPrefixPath("/services", getServiceProvider());
+                .addPrefixPath("/service", getServiceProvider())
+                .addPrefixPath("/socket", getSocketProvider());
 
         Undertow server = Undertow.builder()
                 .addHttpListener(8080, "0.0.0.0")
                 .setHandler(path)
                 .build();
+
         server.start();
 
     }
@@ -58,17 +62,17 @@ public class Server {
 
     private static HttpHandler getServiceProvider() throws ServletException {
 
-        DeploymentInfo servletDeployment = new DeploymentInfo()
+        DeploymentInfo deployment = new DeploymentInfo()
                 .setClassLoader(Thread.currentThread().getContextClassLoader())
-                .setDeploymentName("services.war")
+                .setDeploymentName("service")
                 .setContextPath("/");
 
-        addHealthServlet(servletDeployment);
-        addApiServlet(servletDeployment);
+        addHealthServlet(deployment);
+        addApiServlet(deployment);
 
         ServletContainer container = Servlets.defaultContainer();
 
-        DeploymentManager deploymentManager = container.addDeployment(servletDeployment);
+        DeploymentManager deploymentManager = container.addDeployment(deployment);
         deploymentManager.deploy();
         HttpHandler handler = deploymentManager.start();
         return handler;
@@ -76,7 +80,7 @@ public class Server {
 
     private static void addHealthServlet(DeploymentInfo deploymentInfo) {
 
-        deploymentInfo.addServlets(
+        deploymentInfo.addServlet(
                 Servlets.servlet(HealthServlet.class)
                         .setLoadOnStartup(1)
                         .addMapping("/health")
@@ -101,5 +105,25 @@ public class Server {
 
     }
 
+    private static HttpHandler getSocketProvider() throws ServletException {
+
+        DeploymentInfo deployment = new DeploymentInfo()
+                .setClassLoader(Thread.currentThread().getContextClassLoader())
+                .setDeploymentName("socket")
+                .setContextPath("/");
+
+        WebSocketDeploymentInfo deploymentInfo = new WebSocketDeploymentInfo();
+        deploymentInfo.addEndpoint(WebsocketEndpoint.class);
+
+        deployment.addServletContextAttribute(WebSocketDeploymentInfo.ATTRIBUTE_NAME, deploymentInfo);
+
+        ServletContainer container = Servlets.defaultContainer();
+
+        DeploymentManager deploymentManager = container.addDeployment(deployment);
+        deploymentManager.deploy();
+        HttpHandler handler = deploymentManager.start();
+        return handler;
+
+    }
 
 }
