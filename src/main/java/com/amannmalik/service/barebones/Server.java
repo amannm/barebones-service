@@ -40,7 +40,7 @@ public class Server {
                 .initialize();
 
         PathHandler path = Handlers.path(getContentProvider())
-                .addPrefixPath("/service", getServiceProvider())
+                .addPrefixPath("/services", getServiceProvider())
                 .addPrefixPath("/socket", getSocketProvider());
 
         Undertow server = Undertow.builder()
@@ -64,7 +64,7 @@ public class Server {
 
         DeploymentInfo deployment = new DeploymentInfo()
                 .setClassLoader(Thread.currentThread().getContextClassLoader())
-                .setDeploymentName("service")
+                .setDeploymentName("services")
                 .setContextPath("/");
 
         addHealthServlet(deployment);
