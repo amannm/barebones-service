@@ -1,4 +1,4 @@
-package com.amannmalik.service.barebones.endpoint;
+package systems.cauldron.service.barebones.endpoint;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;

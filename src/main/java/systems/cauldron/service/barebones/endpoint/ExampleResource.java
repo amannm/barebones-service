@@ -1,4 +1,4 @@
-package com.amannmalik.service.barebones.endpoint;
+package systems.cauldron.service.barebones.endpoint;
 
 /**
  * Created by Amann on 8/13/2015.

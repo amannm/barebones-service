@@ -1,4 +1,4 @@
-package com.amannmalik.service.barebones.endpoint;
+package systems.cauldron.service.barebones.endpoint;
 
 /**
  * Created by Amann on 8/11/2015.
@@ -24,7 +24,7 @@ public class ExampleResourceApplication extends Application {
 
         config.setVersion("1");
         config.setBasePath("/services/api");
-        config.setResourcePackage("com.amannmalik.service.barebones.endpoint");
+        config.setResourcePackage("systems.cauldron.service.barebones.endpoint");
 
         config.setScan(true);
     }

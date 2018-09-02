@@ -1,10 +1,7 @@
-package com.amannmalik.service.barebones;
+package systems.cauldron.service.barebones;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import com.amannmalik.service.barebones.endpoint.ExampleResourceApplication;
-import com.amannmalik.service.barebones.endpoint.HealthServlet;
-import com.amannmalik.service.barebones.endpoint.WebsocketEndpoint;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
@@ -20,6 +17,9 @@ import org.jboss.resteasy.spi.ResteasyDeployment;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 import org.slf4j.LoggerFactory;
+import systems.cauldron.service.barebones.endpoint.ExampleResourceApplication;
+import systems.cauldron.service.barebones.endpoint.HealthServlet;
+import systems.cauldron.service.barebones.endpoint.WebsocketEndpoint;
 
 import javax.servlet.ServletException;
 

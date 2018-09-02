@@ -1,12 +1,13 @@
-group 'com.amannmalik.service'
+plugins {
+    id 'java'
+}
 
-apply plugin: "java"
-apply plugin: "application"
+group 'systems.cauldron'
+version '1.0-SNAPSHOT'
 
-mainClassName = "com.amannmalik.service.barebones.Server"
+sourceCompatibility = 10
 
 repositories {
-    mavenLocal()
     mavenCentral()
 }
 
