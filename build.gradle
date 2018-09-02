@@ -13,6 +13,7 @@ repositories {
 
 dependencies {
 
+
     // Logging
     compile "org.slf4j:slf4j-api:1.7.22"
     compile "ch.qos.logback:logback-classic:1.1.8"
@@ -34,6 +35,7 @@ dependencies {
     compile "org.jboss.resteasy:resteasy-jaxrs:3.1.0.Final"
     compile "org.jboss.resteasy:resteasy-cdi:3.1.0.Final"
     compile "org.jboss.resteasy:async-http-servlet-3.0:3.0.19.Final"
+    compile "javax.xml.bind:jaxb-api:2.3.0"
 
     // JSON Processing
     compile "javax.json:javax.json-api:1.0"
@@ -44,16 +46,11 @@ dependencies {
 
     // Unit Testing
     testCompile "junit:junit:4.12"
-
-}
-
-wrapper {
-    gradleVersion = "2.12"
 }
 
 jar {
     manifest {
-        attributes("Main-Class": mainClassName)
+        attributes("Main-Class": "systems.cauldron.service.barebones.Server")
     }
     from {
         configurations.compile.collect {
