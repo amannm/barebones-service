@@ -29,12 +29,22 @@ import javax.servlet.ServletException;
  */
 public class Server {
 
+    private Undertow server;
+    private WeldContainer weld;
 
     public static void main(String[] args) throws ServletException {
 
+        Server defaultServer = new Server(8080);
+        Runtime.getRuntime().addShutdownHook(new Thread(defaultServer::stop));
+        defaultServer.start();
+
+    }
+
+    public Server(int port) throws ServletException {
+
         ((Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(Level.DEBUG);
 
-        WeldContainer container = new Weld()
+        weld = new Weld()
                 .addExtension(new org.jboss.resteasy.cdi.ResteasyCdiExtension())
                 .addPackage(true, Server.class)
                 .initialize();
@@ -43,13 +53,19 @@ public class Server {
                 .addPrefixPath("/services", getServiceProvider())
                 .addPrefixPath("/socket", getSocketProvider());
 
-        Undertow server = Undertow.builder()
+        server = Undertow.builder()
                 .addHttpListener(8080, "0.0.0.0")
                 .setHandler(path)
                 .build();
 
-        server.start();
+    }
 
+    public void start() {
+        server.start();
+    }
+
+    public void stop() {
+        server.stop();
     }
 
     private static HttpHandler getContentProvider() {
