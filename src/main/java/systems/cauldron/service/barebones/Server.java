@@ -29,8 +29,8 @@ import javax.servlet.ServletException;
  */
 public class Server {
 
-    private Undertow server;
-    private WeldContainer weld;
+    private final Undertow server;
+    private final WeldContainer weld;
 
     public static void main(String[] args) throws ServletException {
 
